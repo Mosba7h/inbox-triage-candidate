@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Support Inbox Assistant</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #fff; --text: #1d2330; --muted: #6b7280; --line: #e3e6eb;
+    --accent: #2f6fde; --ok: #1f8a4c; --bad: #c0392b; --warn: #b7791f;
+    --urgent: #c0392b; --high: #d35400; --medium: #b7791f; --low: #6b7280;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #14171c; --panel: #1c2027; --text: #e6e8ec; --muted: #9aa3af; --line: #2c323c; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 system-ui, -apple-system, Segoe UI, sans-serif; background: var(--bg); color: var(--text); }
+  header { display: flex; gap: 12px; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--panel); flex-wrap: wrap; }
+  header h1 { font-size: 16px; margin: 0 12px 0 0; }
+  header .meta { color: var(--muted); font-size: 12px; margin-left: auto; }
+  button, select, textarea, input { font: inherit; color: inherit; }
+  button { border: 1px solid var(--line); background: var(--panel); padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.ok { background: var(--ok); border-color: var(--ok); color: #fff; }
+  button.bad { background: var(--bad); border-color: var(--bad); color: #fff; }
+  button:disabled { opacity: .5; cursor: default; }
+  main { display: grid; grid-template-columns: minmax(280px, 380px) 1fr; height: calc(100vh - 53px); }
+  @media (max-width: 800px) { main { grid-template-columns: 1fr; height: auto; } }
+  #list { border-right: 1px solid var(--line); overflow-y: auto; background: var(--panel); }
+  .filters { display: flex; gap: 6px; padding: 8px; border-bottom: 1px solid var(--line); flex-wrap: wrap; position: sticky; top: 0; background: var(--panel); }
+  .filters button.active { border-color: var(--accent); color: var(--accent); }
+  .row { padding: 10px 12px; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .row:hover, .row.sel { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+  .row .top { display: flex; gap: 6px; align-items: center; }
+  .row .subj { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+  .row .sum { color: var(--muted); font-size: 12px; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pill { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 10px; border: 1px solid var(--line); white-space: nowrap; }
+  .p-urgent { color: #fff; background: var(--urgent); border-color: var(--urgent); }
+  .p-high { color: var(--high); border-color: var(--high); }
+  .p-medium { color: var(--medium); border-color: var(--medium); }
+  .p-low { color: var(--low); }
+  .esc { color: #fff; background: var(--warn); border-color: var(--warn); }
+  .st-approved { color: var(--ok); border-color: var(--ok); }
+  .st-rejected { color: var(--bad); border-color: var(--bad); }
+  #detail { overflow-y: auto; padding: 16px 20px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; margin-bottom: 14px; }
+  .card h2 { font-size: 15px; margin: 0 0 6px; }
+  .card h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 8px; }
+  .body { white-space: pre-wrap; word-break: break-word; }
+  .muted { color: var(--muted); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  select, textarea, input { width: 100%; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); }
+  textarea { min-height: 160px; resize: vertical; }
+  .bar { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; margin-top: 6px; }
+  .bar > div { height: 100%; }
+  .flags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .flag { font-size: 11px; padding: 2px 8px; border-radius: 4px; background: color-mix(in srgb, var(--warn) 15%, transparent); color: var(--warn); }
+  .actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .banner { padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; background: color-mix(in srgb, var(--warn) 15%, transparent); color: var(--warn); }
+  dialog { border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--text); width: min(560px, 92vw); }
+  .empty { padding: 40px; text-align: center; color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Support Inbox Assistant</h1>
+  <button id="triageAll" class="primary">Triage untriaged</button>
+  <button id="newBtn">+ New message</button>
+  <span id="progress" class="muted"></span>
+  <span class="meta" id="meta"></span>
+</header>
+<main>
+  <section id="list">
+    <div class="filters" id="filters"></div>
+    <div id="rows"></div>
+  </section>
+  <section id="detail"><div class="empty">Select a ticket</div></section>
+</main>
+
+<dialog id="newDlg">
+  <form method="dialog" id="newForm">
+    <h3 style="margin-top:0">Triage a new message</h3>
+    <label>Subject</label><input name="subject">
+    <label style="margin-top:8px">Body</label><textarea name="body" required></textarea>
+    <div class="actions"><button value="cancel" formnovalidate>Cancel</button><button class="primary" value="ok">Triage</button></div>
+  </form>
+</dialog>
+
+<script>
+const CATS = ["billing", "bug", "feature_request", "account", "security", "other"];
+const PRIS = ["low", "medium", "high", "urgent"];
+const PRANK = { urgent: 0, high: 1, medium: 2, low: 3 };
+const FILTERS = { all: () => true, pending: i => i.review.status === "pending", escalated: i => i.triage?.escalate && i.review.status === "pending",
+                  approved: i => i.review.status === "approved", rejected: i => i.review.status === "rejected", untriaged: i => !i.triage };
+let items = [], selected = null, filter = "pending";
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+async function api(path, opts = {}) {
+  const r = await fetch(path, { headers: { "Content-Type": "application/json" }, ...opts });
+  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || r.statusText);
+  return r.json();
+}
+
+async function load() {
+  items = await api("/api/tickets");
+  render();
+  api("/api/health").then(h => $("#meta").textContent = `${h.model} @ ${h.base_url}`).catch(() => {});
+}
+
+function sortKey(i) {
+  // escalated first, then by priority, then id
+  const t = i.triage;
+  return [t ? (t.escalate ? 0 : 1) : 2, t ? PRANK[t.priority] : 9, i.id];
+}
+
+function render() {
+  $("#filters").innerHTML = Object.keys(FILTERS).map(f =>
+    `<button data-f="${f}" class="${f === filter ? "active" : ""}">${f} (${items.filter(FILTERS[f]).length})</button>`).join("");
+  const shown = items.filter(FILTERS[filter]).sort((a, b) => {
+    const ka = sortKey(a), kb = sortKey(b);
+    for (let k = 0; k < ka.length; k++) if (ka[k] !== kb[k]) return ka[k] < kb[k] ? -1 : 1;
+    return 0;
+  });
+  $("#rows").innerHTML = shown.map(i => {
+    const t = i.triage, subj = i.ticket.subject || i.ticket.body.slice(0, 60) || "(empty)";
+    return `<div class="row ${i.id === selected ? "sel" : ""}" data-id="${esc(i.id)}">
+      <div class="top"><span class="subj">${esc(subj)}</span>
+        ${t ? `<span class="pill p-${t.priority}">${t.priority}</span>` : `<span class="pill">untriaged</span>`}
+        ${t?.escalate ? `<span class="pill esc">escalate</span>` : ""}
+        ${i.review.status !== "pending" ? `<span class="pill st-${i.review.status}">${i.review.status}</span>` : ""}</div>
+      <div class="sum">${esc(i.id)} · ${t ? esc(t.category) + " · " + esc(t.summary) : esc(i.ticket.channel || "")}</div></div>`;
+  }).join("") || `<div class="empty">Nothing here</div>`;
+  renderDetail();
+}
+
+function renderDetail() {
+  const i = items.find(x => x.id === selected);
+  if (!i) { $("#detail").innerHTML = `<div class="empty">Select a ticket</div>`; return; }
+  const t = i.triage, r = i.review, tk = i.ticket;
+  const conf = t ? Math.round(t.confidence * 100) : 0;
+  const confColor = conf >= 70 ? "var(--ok)" : conf >= 50 ? "var(--warn)" : "var(--bad)";
+  const reply = r.status !== "pending" ? r.final_reply : t?.suggested_reply;
+  $("#detail").innerHTML = `
+    <div class="card">
+      <h3>Message · ${esc(i.id)} · ${esc(tk.channel || "")} · ${esc(tk.from || tk.sender || "")} · ${esc(tk.received_at || "")}</h3>
+      <h2>${esc(tk.subject || "(no subject)")}</h2>
+      <div class="body">${esc(tk.body) || '<span class="muted">(empty body)</span>'}</div>
+    </div>
+    ${!t ? `<div class="card"><p>Not triaged yet.</p><button class="primary" id="retriage">Triage now</button></div>` : `
+    <div class="card">
+      <h3>AI triage <span class="muted">(${esc(t.source)}, ${t.attempts} call${t.attempts === 1 ? "" : "s"}, ${t.latency_ms} ms)</span></h3>
+      ${t.escalate ? `<div class="banner">Escalated — low confidence, sensitive category, or a guard fired. Review carefully.</div>` : ""}
+      <div><b>Summary:</b> ${esc(t.summary)}</div>
+      <div style="margin-top:8px"><b>Confidence:</b> ${conf}%${t.model_confidence != null ? ` <span class="muted">(model said ${Math.round(t.model_confidence * 100)}%)</span>` : ""}
+        <div class="bar"><div style="width:${conf}%;background:${confColor}"></div></div></div>
+      ${t.flags.length ? `<div class="flags">${t.flags.map(f => `<span class="flag">${esc(f)}</span>`).join("")}</div>` : ""}
+    </div>
+    <div class="card">
+      <h3>Review ${r.status !== "pending" ? `· <span class="pill st-${r.status}">${r.status}</span> <span class="muted">${esc(r.reviewed_at)}</span>` : ""}</h3>
+      <div class="grid">
+        <div><label>Category</label><select id="cat">${CATS.map(c => `<option ${c === (r.final_category || t.category) ? "selected" : ""}>${c}</option>`).join("")}</select></div>
+        <div><label>Priority</label><select id="pri">${PRIS.map(p => `<option ${p === (r.final_priority || t.priority) ? "selected" : ""}>${p}</option>`).join("")}</select></div>
+      </div>
+      <label style="margin-top:10px">Reply draft (edit before approving)${!t.suggested_reply ? " — <b>no reply recommended</b>" : ""}</label>
+      <textarea id="reply">${esc(reply)}</textarea>
+      <label style="margin-top:8px">Note (optional)</label><input id="note" value="${esc(r.note || "")}">
+      <div class="actions">
+        <button class="ok" id="approve">Approve</button>
+        <button class="bad" id="reject">Reject</button>
+        <button id="retriage">Re-run triage</button>
+        <span id="msg" class="muted"></span>
+      </div>
+    </div>`}`;
+}
+
+async function triage(id) {
+  const res = await api(`/api/tickets/${encodeURIComponent(id)}/triage`, { method: "POST" });
+  const it = items.find(x => x.id === id);
+  it.triage = res; it.review = { status: "pending" };
+}
+
+async function review(action) {
+  const body = { action, reply: $("#reply").value, category: $("#cat").value, priority: $("#pri").value, note: $("#note").value };
+  try {
+    const rv = await api(`/api/tickets/${encodeURIComponent(selected)}/review`, { method: "POST", body: JSON.stringify(body) });
+    items.find(x => x.id === selected).review = rv;
+    // jump to the next pending ticket in the current view
+    const next = items.filter(FILTERS[filter]).find(x => x.id !== selected && x.review.status === "pending");
+    selected = next?.id ?? selected;
+    render();
+  } catch (e) { $("#msg").textContent = e.message; }
+}
+
+document.addEventListener("click", async e => {
+  const row = e.target.closest(".row");
+  if (row) { selected = row.dataset.id; render(); return; }
+  const f = e.target.dataset?.f;
+  if (f) { filter = f; render(); return; }
+  if (e.target.id === "approve") return review("approve");
+  if (e.target.id === "reject") return review("reject");
+  if (e.target.id === "retriage") {
+    e.target.disabled = true; e.target.textContent = "Triaging…";
+    try { await triage(selected); } catch (err) { alert(err.message); }
+    render();
+  }
+});
+
+$("#triageAll").onclick = async () => {
+  const todo = items.filter(i => !i.triage);
+  const btn = $("#triageAll"); btn.disabled = true;
+  for (let k = 0; k < todo.length; k++) {
+    $("#progress").textContent = `Triaging ${k + 1}/${todo.length}…`;
+    try { await triage(todo[k].id); } catch (err) { console.error(err); }
+    render();
+  }
+  $("#progress").textContent = todo.length ? "Done" : "Everything is triaged";
+  btn.disabled = false;
+};
+
+$("#newBtn").onclick = () => $("#newDlg").showModal();
+$("#newForm").addEventListener("submit", async e => {
+  if (e.submitter?.value !== "ok") return;
+  const fd = new FormData(e.target);
+  $("#progress").textContent = "Triaging new message…";
+  try {
+    const item = await api("/api/tickets", { method: "POST", body: JSON.stringify({ subject: fd.get("subject"), body: fd.get("body") }) });
+    items.push(item); selected = item.id; filter = "all"; e.target.reset();
+  } catch (err) { alert(err.message); }
+  $("#progress").textContent = ""; render();
+});
+
+load();
+</script>
+</body>
+</html>

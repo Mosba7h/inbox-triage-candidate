@@ -1,0 +1,4 @@
+language: python
+run_command: "make run"
+eval_command: "make eval"
+test_command: "make test"
