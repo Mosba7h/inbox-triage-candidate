@@ -8,30 +8,14 @@ review-queue UI; nothing is ever sent automatically.
 Model: `llama3.2:3b` via any OpenAI-compatible endpoint (Ollama by default).
 
 ```mermaid
-flowchart TD
-    UI["Review UI<br/>(static/index.html)"] <-->|HTTP / JSON| API["FastAPI<br/>(api.py)"]
-    CLI["sh run.sh eval<br/>(evaluate.py + batch.py)"] --> T
-    API --> T
-    API <--> STORE[("review_state.json<br/>(store.py)")]
-
-    T["Ticket"] --> E{"Empty body?"}
-    E -->|yes| RULE["Rule answer: ask for details<br/>other / low · escalate · no model call"]
-    E -->|no| LLM["Ask llama3.2:3b<br/>(prompts.py · llm.py)<br/>ticket JSON-encoded inside ticket tags"]
-    LLM --> P{"Parse · repair · validate<br/>(parsing.py + Pydantic)"}
-    P -->|invalid| RETRY["Retry with the validation error<br/>(up to 2×)"]
-    RETRY --> LLM
-    P -->|still invalid| FB["Salvage valid fields<br/>+ keyword fallback<br/>confidence 0.2 · escalate"]
-    P -->|valid| G
-    FB --> G["Guards (rules.py)<br/>injection · phishing · security floor<br/>legal → escalate · urgent needs evidence"]
-    G --> LANG{"Reply in the<br/>customer's language?"}
-    LANG -->|no| FIX["One follow-up call<br/>for the right language"]
-    FIX --> CHK
-    LANG -->|yes| CHK["Reply checks<br/>leak / password / link → safe template<br/>invented policy or status · card-details ask → flag + escalate<br/>promises · placeholders → flag"]
-    CHK --> C["Confidence: capped at 0.9, then penalties<br/>escalate = low confidence · security · urgent<br/>· fallback · sensitive flag"]
-    RULE --> R
-    C --> R["TriageResult<br/>category · priority · summary · reply<br/>confidence · escalate (+ flags)"]
-    R --> Q["Review queue: a human approves / edits / rejects<br/>nothing is sent automatically"]
-    R --> EV["eval/results.json · report.md · details.json"]
+flowchart LR
+    A[Ticket] --> B[LLM<br/>llama3.2:3b]
+    B --> C{Valid output?}
+    C -- no --> D[Retry<br/>then fallback]
+    D --> E
+    C -- yes --> E[Safety guards]
+    E --> F[Confidence<br/>+ escalate]
+    F --> G[Review UI<br/>human approves]
 ```
 
 ---
