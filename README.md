@@ -98,8 +98,10 @@ classifier (×0.7), and very short or vague messages (cap 0.5).
 
 ### 4. Review queue ([`triage/api.py`](triage/api.py), [`triage/static/index.html`](triage/static/index.html))
 
-FastAPI plus a single static HTML page with no build step. Escalated tickets sort to the top,
-then by priority. The reviewer sees the original message, the triage, confidence (calibrated
+FastAPI plus a single static HTML page with no build step. By default escalated tickets sort to the top,
+then by priority. The list also has status tabs, category and priority filters, free-text search
+(subject, body, summary and flags), and sort by priority, confidence (lowest first is useful for
+review) or date. The reviewer sees the original message, the triage, confidence (calibrated
 and raw), and every guard flag. They can change the category or priority, edit the reply,
 then approve or reject. Approving an empty reply is refused. Each decision records whether
 the reply, category or priority was corrected, since that's the data you'd want for improving
