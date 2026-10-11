@@ -28,7 +28,12 @@
   main { display: grid; grid-template-columns: minmax(280px, 380px) 1fr; height: calc(100vh - 53px); }
   @media (max-width: 800px) { main { grid-template-columns: 1fr; height: auto; } }
   #list { border-right: 1px solid var(--line); overflow-y: auto; background: var(--panel); }
-  .filters { display: flex; gap: 6px; padding: 8px; border-bottom: 1px solid var(--line); flex-wrap: wrap; position: sticky; top: 0; background: var(--panel); }
+  .listhead { position: sticky; top: 0; background: var(--panel); border-bottom: 1px solid var(--line); z-index: 1; }
+  .filters { display: flex; gap: 6px; padding: 8px 8px 4px; flex-wrap: wrap; }
+  .toolbar { display: grid; grid-template-columns: 1fr 1fr auto; grid-auto-flow: dense; gap: 6px; padding: 4px 8px 6px; }
+  .toolbar #q, .toolbar #sort { grid-column: 1 / -1; }
+  .toolbar select, .toolbar input { padding: 5px 8px; }
+  .count { font-size: 12px; padding: 0 10px 6px; }
   .filters button.active { border-color: var(--accent); color: var(--accent); }
   .row { padding: 10px 12px; border-bottom: 1px solid var(--line); cursor: pointer; }
   .row:hover, .row.sel { background: color-mix(in srgb, var(--accent) 8%, transparent); }
@@ -73,7 +78,25 @@
 </header>
 <main>
   <section id="list">
-    <div class="filters" id="filters"></div>
+    <div class="listhead">
+      <div class="filters" id="filters"></div>
+      <div class="toolbar">
+        <input id="q" type="search" placeholder="Search subject, body, summary, id…">
+        <select id="fCat" title="Category"><option value="">All categories</option></select>
+        <select id="fPri" title="Priority"><option value="">All priorities</option></select>
+        <select id="sort" title="Sort">
+          <option value="smart">Sort: escalated → priority</option>
+          <option value="priority">Sort: priority (urgent first)</option>
+          <option value="conf_asc">Sort: confidence (lowest first)</option>
+          <option value="conf_desc">Sort: confidence (highest first)</option>
+          <option value="newest">Sort: newest first</option>
+          <option value="oldest">Sort: oldest first</option>
+          <option value="id">Sort: id</option>
+        </select>
+        <button id="clearF" title="Reset filters">Reset</button>
+      </div>
+      <div class="muted count" id="count"></div>
+    </div>
     <div id="rows"></div>
   </section>
   <section id="detail"><div class="empty">Select a ticket</div></section>
@@ -95,6 +118,10 @@ const PRANK = { urgent: 0, high: 1, medium: 2, low: 3 };
 const FILTERS = { all: () => true, pending: i => i.review.status === "pending", escalated: i => i.triage?.escalate && i.review.status === "pending",
                   approved: i => i.review.status === "approved", rejected: i => i.review.status === "rejected", untriaged: i => !i.triage };
 let items = [], selected = null, filter = "pending";
+// list controls; remembered per browser (best-effort, works without storage too)
+const view = { q: "", cat: "", pri: "", sort: "smart" };
+try { Object.assign(view, JSON.parse(localStorage.getItem("triage.view") || "{}")); filter = localStorage.getItem("triage.filter") || filter; } catch {}
+function saveView() { try { localStorage.setItem("triage.view", JSON.stringify(view)); localStorage.setItem("triage.filter", filter); } catch {} }
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -111,20 +138,46 @@ async function load() {
   api("/api/health").then(h => $("#meta").textContent = `${h.model} @ ${h.base_url}`).catch(() => {});
 }
 
-function sortKey(i) {
-  // escalated first, then by priority, then id
+// Untriaged tickets always sink to the bottom of triage-based sorts.
+const SORTS = {
+  smart: i => [i.triage ? (i.triage.escalate ? 0 : 1) : 2, i.triage ? PRANK[i.triage.priority] : 9, i.id],
+  priority: i => [i.triage ? PRANK[i.triage.priority] : 9, i.triage?.escalate ? 0 : 1, i.id],
+  conf_asc: i => [i.triage ? 0 : 1, i.triage?.confidence ?? 0, i.id],
+  conf_desc: i => [i.triage ? 0 : 1, -(i.triage?.confidence ?? 0), i.id],
+  newest: i => [i.ticket.received_at ? 0 : 1, -(Date.parse(i.ticket.received_at) || 0), i.id],
+  oldest: i => [i.ticket.received_at ? 0 : 1, Date.parse(i.ticket.received_at) || 0, i.id],
+  id: i => [i.id],
+};
+
+function cmp(ka, kb) {
+  for (let k = 0; k < ka.length; k++) if (ka[k] !== kb[k]) return ka[k] < kb[k] ? -1 : 1;
+  return 0;
+}
+
+// filters other than the status buttons
+function matchesControls(i) {
   const t = i.triage;
-  return [t ? (t.escalate ? 0 : 1) : 2, t ? PRANK[t.priority] : 9, i.id];
+  if (view.cat && t?.category !== view.cat) return false;
+  if (view.pri && t?.priority !== view.pri) return false;
+  if (view.q) {
+    const hay = [i.id, i.ticket.subject, i.ticket.body, i.ticket.from, t?.summary, t?.category, ...(t?.flags || [])]
+      .join(" ").toLowerCase();
+    if (!view.q.toLowerCase().split(/\s+/).filter(Boolean).every(w => hay.includes(w))) return false;
+  }
+  return true;
+}
+
+function visible() {
+  const key = SORTS[view.sort] || SORTS.smart;
+  return items.filter(i => FILTERS[filter](i) && matchesControls(i)).sort((a, b) => cmp(key(a), key(b)));
 }
 
 function render() {
+  const base = items.filter(matchesControls);  // status counts respect the other filters
   $("#filters").innerHTML = Object.keys(FILTERS).map(f =>
-    `<button data-f="${f}" class="${f === filter ? "active" : ""}">${f} (${items.filter(FILTERS[f]).length})</button>`).join("");
-  const shown = items.filter(FILTERS[filter]).sort((a, b) => {
-    const ka = sortKey(a), kb = sortKey(b);
-    for (let k = 0; k < ka.length; k++) if (ka[k] !== kb[k]) return ka[k] < kb[k] ? -1 : 1;
-    return 0;
-  });
+    `<button data-f="${f}" class="${f === filter ? "active" : ""}">${f} (${base.filter(FILTERS[f]).length})</button>`).join("");
+  const shown = visible();
+  $("#count").textContent = `${shown.length} of ${items.length} tickets`;
   $("#rows").innerHTML = shown.map(i => {
     const t = i.triage, subj = i.ticket.subject || i.ticket.body.slice(0, 60) || "(empty)";
     return `<div class="row ${i.id === selected ? "sel" : ""}" data-id="${esc(i.id)}">
@@ -189,7 +242,7 @@ async function review(action) {
     const rv = await api(`/api/tickets/${encodeURIComponent(selected)}/review`, { method: "POST", body: JSON.stringify(body) });
     items.find(x => x.id === selected).review = rv;
     // jump to the next pending ticket in the current view
-    const next = items.filter(FILTERS[filter]).find(x => x.id !== selected && x.review.status === "pending");
+    const next = visible().find(x => x.id !== selected && x.review.status === "pending");
     selected = next?.id ?? selected;
     render();
   } catch (e) { $("#msg").textContent = e.message; }
@@ -199,7 +252,7 @@ document.addEventListener("click", async e => {
   const row = e.target.closest(".row");
   if (row) { selected = row.dataset.id; render(); return; }
   const f = e.target.dataset?.f;
-  if (f) { filter = f; render(); return; }
+  if (f) { filter = f; saveView(); render(); return; }
   if (e.target.id === "approve") return review("approve");
   if (e.target.id === "reject") return review("reject");
   if (e.target.id === "retriage") {
@@ -232,6 +285,23 @@ $("#newForm").addEventListener("submit", async e => {
   } catch (err) { alert(err.message); }
   $("#progress").textContent = ""; render();
 });
+
+// list controls
+$("#fCat").insertAdjacentHTML("beforeend", CATS.map(c => `<option value="${c}">${c}</option>`).join(""));
+$("#fPri").insertAdjacentHTML("beforeend", [...PRIS].reverse().map(p => `<option value="${p}">${p}</option>`).join(""));
+if (!FILTERS[filter]) filter = "pending";
+if (!SORTS[view.sort]) view.sort = "smart";
+const controls = { q: "#q", cat: "#fCat", pri: "#fPri", sort: "#sort" };
+for (const [k, sel] of Object.entries(controls)) {
+  $(sel).value = view[k];
+  view[k] = $(sel).value;  // drops stale saved values that no longer match an option
+  $(sel).addEventListener("input", () => { view[k] = $(sel).value; saveView(); render(); });
+}
+$("#clearF").onclick = () => {
+  Object.assign(view, { q: "", cat: "", pri: "", sort: "smart" }); filter = "all";
+  for (const [k, sel] of Object.entries(controls)) $(sel).value = view[k];
+  saveView(); render();
+};
 
 load();
 </script>
