@@ -190,6 +190,16 @@ function render() {
   renderDetail();
 }
 
+// Context for the priority: the impact signals the model noticed, and whether a guard
+// (or facts mode) changed the model's own judgement.
+function priorityWhy(t) {
+  if (!t.model_priority) return `<span class="muted">(rule-based)</span>`;
+  const facts = Object.entries(t.impact || {}).filter(([, v]) => v).map(([k]) => k.replaceAll("_", " "));
+  const signals = t.impact ? (facts.length ? `signals: ${facts.map(esc).join(", ")}` : "no impact signals") : "";
+  const changed = t.model_priority !== t.priority ? `model said <b>${esc(t.model_priority)}</b>, adjusted by a rule` : "";
+  return `<span class="muted">${[signals, changed].filter(Boolean).join(" · ")}</span>`;
+}
+
 function renderDetail() {
   const i = items.find(x => x.id === selected);
   if (!i) { $("#detail").innerHTML = `<div class="empty">Select a ticket</div>`; return; }
@@ -208,6 +218,7 @@ function renderDetail() {
       <h3>AI triage <span class="muted">(${esc(t.source)}, ${t.attempts} call${t.attempts === 1 ? "" : "s"}, ${t.latency_ms} ms)</span></h3>
       ${t.escalate ? `<div class="banner">Escalated — low confidence, sensitive category, or a guard fired. Review carefully.</div>` : ""}
       <div><b>Summary:</b> ${esc(t.summary)}</div>
+      <div style="margin-top:8px"><b>Priority:</b> <span class="pill p-${t.priority}">${t.priority}</span> ${priorityWhy(t)}</div>
       <div style="margin-top:8px"><b>Confidence:</b> ${conf}%${t.model_confidence != null ? ` <span class="muted">(model said ${Math.round(t.model_confidence * 100)}%)</span>` : ""}
         <div class="bar"><div style="width:${conf}%;background:${confColor}"></div></div></div>
       ${t.flags.length ? `<div class="flags">${t.flags.map(f => `<span class="flag">${esc(f)}</span>`).join("")}</div>` : ""}

@@ -65,3 +65,13 @@ def test_cannot_approve_reply_with_placeholders(settings):
     r = client.post("/api/tickets/T-001/review", json={"action": "approve", "reply": "Renews on [CONFIRM: date]",
                                                        "category": "billing", "priority": "high"})
     assert r.status_code == 422
+
+
+def test_threshold_sweep_counts_caught_errors():
+    from triage.schema import TriageResult
+    labels = {"A": {"category": "bug", "priority": "high"}, "B": {"category": "bug", "priority": "high"}}
+    base = dict(summary="s", suggested_reply="r", escalate=False, source="llm")
+    results = [TriageResult(id="A", category="bug", priority="high", confidence=0.9, **base),     # right, confident
+               TriageResult(id="B", category="billing", priority="high", confidence=0.3, **base)]  # wrong, unsure
+    row = next(r for r in evaluate.threshold_sweep(results, labels) if r["threshold"] == 0.6)
+    assert row == {"threshold": 0.6, "escalated_share": 0.5, "errors_caught": 1.0}

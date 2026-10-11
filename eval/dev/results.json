@@ -1,0 +1,309 @@
+{
+  "metrics": {
+    "category_accuracy": 0.812,
+    "priority_agreement": 0.812,
+    "priority_within_one_level": 1.0,
+    "both_correct": 0.688,
+    "n_labeled": 32,
+    "n_predictions": 32,
+    "escalation_rate": 0.312,
+    "mean_confidence_category_correct": 0.782,
+    "mean_confidence_category_wrong": 0.75,
+    "mean_confidence_priority_correct": 0.763,
+    "mean_confidence_priority_wrong": 0.833,
+    "category_accuracy_not_escalated": 0.818,
+    "n_labeled_not_escalated": 22,
+    "errors_caught_by_escalation": 0.3,
+    "n_labeled_with_any_error": 10
+  },
+  "predictions": [
+    {
+      "id": "D-001",
+      "category": "billing",
+      "priority": "high",
+      "summary": "Overcharged on monthly storage add-on.",
+      "suggested_reply": "Hi, sorry for the mistake. We'll correct the overcharge and refund the excess amount. You'll receive a separate email with the refund details.",
+      "confidence": 0.9,
+      "escalate": false
+    },
+    {
+      "id": "D-002",
+      "category": "bug",
+      "priority": "urgent",
+      "summary": "Dashboard 502 Bad Gateway for all agents.",
+      "suggested_reply": "Hi, sorry to hear that the entire support floor is affected. We're investigating the issue immediately and will work to resolve it as soon as possible. Please stay tuned for updates.",
+      "confidence": 0.9,
+      "escalate": true
+    },
+    {
+      "id": "D-003",
+      "category": "feature_request",
+      "priority": "low",
+      "summary": "Request to add collapsible sidebar.",
+      "suggested_reply": "Thanks for the suggestion! We'll consider adding a collapsible sidebar to our product. No timeline is set yet, but we'll keep your feedback in mind.",
+      "confidence": 0.7,
+      "escalate": false
+    },
+    {
+      "id": "D-004",
+      "category": "account",
+      "priority": "high",
+      "summary": "Login link points to old email address after address change.",
+      "suggested_reply": "Hi, sorry to hear that the login link is no longer working. We'll need to update your account to use your new email address. Can you please confirm your new email address so we can assist you further?",
+      "confidence": 0.9,
+      "escalate": false
+    },
+    {
+      "id": "D-005",
+      "category": "feature_request",
+      "priority": "low",
+      "summary": "Request to format dates correctly in CSV export according to user locale.",
+      "suggested_reply": "Thanks for pointing this out. We'll make sure to update our CSV export to respect user locale settings. We'll let you know once it's fixed.",
+      "confidence": 0.7,
+      "escalate": false
+    },
+    {
+      "id": "D-006",
+      "category": "security",
+      "priority": "urgent",
+      "summary": "Abuse of API key in unauthorized IP range.",
+      "suggested_reply": "Hi, thank you for reaching out. We'll immediately lock down the affected API key and investigate the incident. Our security team will contact you via private channel to discuss next steps and ensure your account's security.",
+      "confidence": 0.9,
+      "escalate": true
+    },
+    {
+      "id": "D-007",
+      "category": "other",
+      "priority": "low",
+      "summary": "Customer thanks for previous help.",
+      "suggested_reply": "You're welcome! Glad to hear everything is sorted now.",
+      "confidence": 0.4,
+      "escalate": true
+    },
+    {
+      "id": "D-008",
+      "category": "billing",
+      "priority": "medium",
+      "summary": "Switch to monthly billing at next renewal date.",
+      "suggested_reply": "Hi, we've noted your request to switch to monthly billing at our next renewal date. We'll make the necessary changes and confirm the updated plan with you before the renewal date.",
+      "confidence": 0.9,
+      "escalate": false
+    },
+    {
+      "id": "D-009",
+      "category": "account",
+      "priority": "medium",
+      "summary": "Request to change display name on profile.",
+      "suggested_reply": "Hi, to change your display name, please click on your profile picture and select 'Edit profile'. From there, you can update your display name. If you need help, feel free to ask!",
+      "confidence": 0.9,
+      "escalate": false
+    },
+    {
+      "id": "D-010",
+      "category": "bug",
+      "priority": "high",
+      "summary": "Documents saved blank, lost work since morning.",
+      "suggested_reply": "Sorry to hear that you've lost your work. We'll investigate this issue as soon as possible and follow up with you to see if we can recover your documents or provide any further assistance.",
+      "confidence": 0.9,
+      "escalate": false
+    },
+    {
+      "id": "D-011",
+      "category": "feature_request",
+      "priority": "medium",
+      "summary": "Xero integration for invoice import.",
+      "suggested_reply": "Hi, thanks for reaching out! We're always looking for ways to improve our integrations. I've passed your request for an Xero integration to our product team. We'll let you know if it's something we can explore in the future.",
+      "confidence": 0.7,
+      "escalate": false
+    },
+    {
+      "id": "D-012",
+      "category": "other",
+      "priority": "medium",
+      "summary": "Request for HIPAA Business Associate Agreement (BAA) for hospital network consideration.",
+      "suggested_reply": "Hi, thank you for reaching out. We'd be happy to provide a HIPAA BAA for your review. Our compliance team will send over a draft for your consideration. We look forward to discussing our product with you at your procurement meeting next month.",
+      "confidence": 0.9,
+      "escalate": false
+    },
+    {
+      "id": "D-013",
+      "category": "other",
+      "priority": "high",
+      "summary": "CCPA request for personal data copy.",
+      "suggested_reply": "Dear ’Customer‖, thank you for your request. We will respond within the legally required timeframe. Please allow us to verify your request and we will be in touch shortly.",
+      "confidence": 0.9,
+      "escalate": true
+    },
+    {
+      "id": "D-014",
+      "category": "account",
+      "priority": "high",
+      "summary": "Customer is experiencing frequent logouts; deadline for resolution is this week.",
+      "suggested_reply": "Hi, sorry to hear you're still experiencing logouts. We'll prioritize your case and work to resolve the issue ASAP. Can you please confirm your account details so we can expedite the process?",
+      "confidence": 0.9,
+      "escalate": false
+    },
+    {
+      "id": "D-015",
+      "category": "billing",
+      "priority": "high",
+      "summary": "Payment failing, account suspended due to recurring payment issues.",
+      "suggested_reply": "Hi, sorry to hear that your payment is failing and your account has been suspended. We'll investigate the issue with your card and work to resolve the payment problem so you can access your account again.",
+      "confidence": 0.9,
+      "escalate": false
+    },
+    {
+      "id": "D-016",
+      "category": "feature_request",
+      "priority": "low",
+      "summary": "Exclude archived projects from search results.",
+      "suggested_reply": "Thanks for pointing this out! We'll consider adding a filter to exclude archived projects from search results to help new team members find the projects they need more easily.",
+      "confidence": 0.9,
+      "escalate": false
+    },
+    {
+      "id": "D-017",
+      "category": "other",
+      "priority": "low",
+      "summary": "Spam email claiming free audit",
+      "suggested_reply": "Hi, thank you for reaching out. However, we don't offer free audits, and we can't verify the legitimacy of this offer. Please be cautious of unsolicited emails and don't respond to this message.",
+      "confidence": 0.9,
+      "escalate": false
+    },
+    {
+      "id": "D-018",
+      "category": "feature_request",
+      "priority": "low",
+      "summary": "Request for dark theme in mobile app.",
+      "suggested_reply": "Thanks for the suggestion! We'll add dark theme to our mobile app roadmap. You can follow our updates on [CONFIRM: platform] for the latest news.",
+      "confidence": 0.5,
+      "escalate": true
+    },
+    {
+      "id": "D-019",
+      "category": "billing",
+      "priority": "medium",
+      "summary": "Request for receipt copy from last month.",
+      "suggested_reply": "Hi, I've sent you a copy of your receipt for last month. If you need any further assistance, please let us know.",
+      "confidence": 0.7,
+      "escalate": false
+    },
+    {
+      "id": "D-020",
+      "category": "account",
+      "priority": "medium",
+      "summary": "Request to remove former colleague from workspace.",
+      "suggested_reply": "Hi, I've removed Sam from our workspace. Please let me know if you need any further assistance.",
+      "confidence": 0.9,
+      "escalate": false
+    },
+    {
+      "id": "D-021",
+      "category": "bug",
+      "priority": "urgent",
+      "summary": "Webhooks stopped firing, order processing stalled in production.",
+      "suggested_reply": "Hi, sorry to hear that webhooks have stopped firing. This is a critical issue that's affecting your production system. Our team is on it ASAP to resolve the issue and get webhooks firing again.",
+      "confidence": 0.9,
+      "escalate": true
+    },
+    {
+      "id": "D-022",
+      "category": "other",
+      "priority": "low",
+      "summary": "Empty message",
+      "suggested_reply": "Can you please provide more context or clarify the issue?",
+      "confidence": 0.144,
+      "escalate": true
+    },
+    {
+      "id": "D-023",
+      "category": "feature_request",
+      "priority": "medium",
+      "summary": "Support for Azure AD SSO",
+      "suggested_reply": "Hi, thanks for reaching out! We're happy to help. We'll look into adding Azure AD SSO support for you. Can you please provide more details about your current setup and requirements? We'll follow up with an update on our progress.",
+      "confidence": 0.6,
+      "escalate": false
+    },
+    {
+      "id": "D-024",
+      "category": "bug",
+      "priority": "high",
+      "summary": "Upload button freezes indefinitely; urgent file upload needed.",
+      "suggested_reply": "Hi, sorry to hear that you're experiencing issues with file uploads. We'll look into this ASAP to get your files to you in time for tomorrow's presentation. Can you please confirm your presentation details so we can prioritize the issue?",
+      "confidence": 0.9,
+      "escalate": false
+    },
+    {
+      "id": "D-025",
+      "category": "account",
+      "priority": "low",
+      "summary": "API key location inquiry.",
+      "suggested_reply": "Hi, I'm not sure about the exact location of your API key in our settings. Could you please check your account settings or contact our support team for more information?",
+      "confidence": 0.4,
+      "escalate": true
+    },
+    {
+      "id": "D-026",
+      "category": "security",
+      "priority": "urgent",
+      "summary": "Potential stored XSS vulnerability in comments.",
+      "suggested_reply": "Thank you for reporting this. We'll investigate and contact you privately to discuss further. Our security team will take immediate action to address the issue.",
+      "confidence": 0.9,
+      "escalate": true
+    },
+    {
+      "id": "D-027",
+      "category": "billing",
+      "priority": "high",
+      "summary": "Price mismatch between pricing page and checkout for Team plan upgrade.",
+      "suggested_reply": "Hi, sorry for the discrepancy. We'll verify the pricing and get back to you with the correct price for your Team plan. We'll also assist with the upgrade for your 12 seats.",
+      "confidence": 0.9,
+      "escalate": false
+    },
+    {
+      "id": "D-028",
+      "category": "other",
+      "priority": "low",
+      "summary": "Typo in order confirmation email.",
+      "suggested_reply": "Sorry about the typo. We'll make sure to double-check our emails for accuracy. Thanks for bringing this to our attention.",
+      "confidence": 0.4,
+      "escalate": true
+    },
+    {
+      "id": "D-029",
+      "category": "account",
+      "priority": "high",
+      "summary": "Account deleted by mistake; project history needs to be restored.",
+      "suggested_reply": "I'm so sorry to hear that your account was deleted by mistake. We'll do our best to recover your project history for you. Can you please confirm your email address associated with the account so we can look into this further?",
+      "confidence": 0.9,
+      "escalate": false
+    },
+    {
+      "id": "D-030",
+      "category": "feature_request",
+      "priority": "medium",
+      "summary": "Request for Spanish support for Business plan",
+      "suggested_reply": "Hola, gracias por contactarnos. Estamos encantados de ayudarle con su pregunta. Nuestro soporte en español está disponible para el plan Business. Por favor, háganos saber cómo podemos ayudarle con sus preguntas y necesidades.",
+      "confidence": 0.7,
+      "escalate": false
+    },
+    {
+      "id": "D-031",
+      "category": "bug",
+      "priority": "high",
+      "summary": "Application crashes when opening shared project.",
+      "suggested_reply": "Bonjour, désolé de savoir que l'application plante et que vous ne pouvez plus travailler avec votre équipe. Nous allons y faire attention pour vous aider à reprendre le travail dès que possible.",
+      "confidence": 0.9,
+      "escalate": false
+    },
+    {
+      "id": "D-032",
+      "category": "billing",
+      "priority": "high",
+      "summary": "Double charge for March payment",
+      "suggested_reply": "Hallo, entschuldigung für den Fehler. Wir werden den Überzug für den doppelten Betrag auf Ihre Karte korrigieren. Sie erhalten die korrigierte Summe bald.",
+      "confidence": 0.9,
+      "escalate": false
+    }
+  ]
+}

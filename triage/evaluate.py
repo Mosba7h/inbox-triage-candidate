@@ -10,6 +10,7 @@ Writes:
 
 from __future__ import annotations
 
+import argparse
 import json
 import logging
 import sys
@@ -38,8 +39,10 @@ def compute_metrics(results: list[TriageResult], labels: dict[str, dict]) -> dic
     pri_hits = [r for r in scored if r.priority == labels[r.id]["priority"]]
     pri_near = [r for r in scored if abs(PRIORITY_RANK[r.priority] - PRIORITY_RANK[labels[r.id]["priority"]]) <= 1]
     cat_ok = {r.id for r in cat_hits}
+    pri_ok = {r.id for r in pri_hits}
     both = [r for r in pri_hits if r.id in cat_ok]
     auto = [r for r in scored if not r.escalate]
+    wrong = [r for r in scored if r.id not in cat_ok or r.id not in pri_ok]
 
     def avg(xs):
         return round(sum(xs) / len(xs), 3) if xs else None
@@ -55,9 +58,31 @@ def compute_metrics(results: list[TriageResult], labels: dict[str, dict]) -> dic
         # Is confidence telling us anything? Compare on the labeled subset.
         "mean_confidence_category_correct": avg([r.confidence for r in cat_hits]),
         "mean_confidence_category_wrong": avg([r.confidence for r in scored if r.id not in cat_ok]),
+        "mean_confidence_priority_correct": avg([r.confidence for r in pri_hits]),
+        "mean_confidence_priority_wrong": avg([r.confidence for r in scored if r.id not in pri_ok]),
         "category_accuracy_not_escalated": round(sum(r.id in cat_ok for r in auto) / len(auto), 3) if auto else None,
         "n_labeled_not_escalated": len(auto),
+        # The trust metric: of the tickets we got wrong (either field), how many did a human get pointed at?
+        "errors_caught_by_escalation": round(sum(r.escalate for r in wrong) / len(wrong), 3) if wrong else None,
+        "n_labeled_with_any_error": len(wrong),
     }
+
+
+def threshold_sweep(results: list[TriageResult], labels: dict[str, dict]) -> list[dict]:
+    """Confidence alone as the escalation rule, at several thresholds: how much of the
+    queue gets escalated vs how many of the wrong tickets it catches. A useful
+    confidence signal catches most errors while escalating a small share."""
+    scored = [r for r in results if r.id in labels]
+    wrong = [r for r in scored if (r.category, r.priority) != (labels[r.id]["category"], labels[r.id]["priority"])]
+    rows = []
+    for th in (0.4, 0.5, 0.6, 0.7, 0.8, 0.9):
+        flagged = [r for r in scored if r.confidence < th]
+        rows.append({
+            "threshold": th,
+            "escalated_share": round(len(flagged) / len(scored), 3) if scored else None,
+            "errors_caught": round(sum(r.confidence < th for r in wrong) / len(wrong), 3) if wrong else None,
+        })
+    return rows
 
 
 def _confusion(results, labels, field, values) -> str:
@@ -79,19 +104,25 @@ def write_report(path: Path, results, labels, metrics, run_stats, tickets) -> No
     lines += [f"| {k} | {v} |" for k, v in metrics.items()]
     lines += ["", "## Run", "", "| stat | value |", "|---|---|"]
     lines += [f"| {k} | {v} |" for k, v in run_stats.items()]
+    lines += ["", "## Is confidence useful? (confidence-only escalation, labeled subset)", "",
+              "| threshold | share of queue escalated | share of wrong tickets caught |", "|---|---|---|"]
+    lines += [f"| < {row['threshold']} | {row['escalated_share']} | {row['errors_caught']} |"
+              for row in threshold_sweep(results, labels)]
     lines += ["", "## Category confusion (labeled subset)", "", _confusion(results, labels, "category", CATEGORIES)]
     lines += ["## Priority confusion (labeled subset)", "", _confusion(results, labels, "priority", PRIORITIES)]
 
-    lines += ["## Labeled tickets", "", "| id | gold cat | pred cat | gold pri | pred pri | conf | esc | source | flags |",
-              "|---|---|---|---|---|---|---|---|---|"]
+    lines += ["## Labeled tickets", "",
+              "| id | gold cat | pred cat | gold pri | pred pri | model's own pri | facts | conf | esc | source | flags |",
+              "|---|---|---|---|---|---|---|---|---|---|---|"]
     for r in results:
         if r.id not in labels:
             continue
         g = labels[r.id]
         c = r.category if r.category == g["category"] else f"**{r.category}** ✗"
         p = r.priority if r.priority == g["priority"] else f"**{r.priority}** ✗"
-        lines.append(f"| {r.id} | {g['category']} | {c} | {g['priority']} | {p} | {r.confidence:.2f} | "
-                     f"{'yes' if r.escalate else ''} | {r.source} | {', '.join(r.flags)} |")
+        facts = ", ".join(k for k, v in (r.impact or {}).items() if v) or ("none" if r.impact else "-")
+        lines.append(f"| {r.id} | {g['category']} | {c} | {g['priority']} | {p} | {r.model_priority or '-'} | {facts} | "
+                     f"{r.confidence:.2f} | {'yes' if r.escalate else ''} | {r.source} | {', '.join(r.flags)} |")
 
     lines += ["", "## Unlabeled tickets (spot-check by hand)", "", "| id | subject | cat | pri | conf | esc | flags |",
               "|---|---|---|---|---|---|---|"]
@@ -104,14 +135,22 @@ def write_report(path: Path, results, labels, metrics, run_stats, tickets) -> No
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Triage tickets with the live model and score them against labels.")
+    parser.add_argument("--tickets", type=Path, help="tickets JSON (default: data/tickets.json)")
+    parser.add_argument("--labels", type=Path, help="labels JSON (default: data/labels.json)")
+    parser.add_argument("--out", type=Path, help="output directory (default: eval/)")
+    args = parser.parse_args(argv)
+
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+    logging.getLogger("httpx").setLevel(logging.WARNING)
     settings = load_settings()
-    tickets = load_tickets(settings.tickets_path)
-    labels = load_labels(settings.labels_path)
+    tickets = load_tickets(args.tickets or settings.tickets_path)
+    labels = load_labels(args.labels or settings.labels_path)
+    out = (args.out / "results.json") if args.out else settings.results_path
     model = OpenAICompatibleModel(settings)
-    log.info("Triaging %d tickets with %s at %s (concurrency=%d)", len(tickets), settings.llm_model,
-             settings.llm_base_url, settings.concurrency)
+    log.info("Triaging %d tickets with %s at %s (concurrency=%d)", len(tickets),
+             settings.llm_model, settings.llm_base_url, settings.concurrency)
 
     t0 = time.perf_counter()
     done = Counter()
@@ -126,22 +165,25 @@ def main() -> int:
 
     metrics = compute_metrics(results, labels)
     sources = Counter(r.source for r in results)
+    all_flags = Counter(f for r in results for f in r.flags)
     run_stats = {
         "model": settings.llm_model,
         "llm_calls": model.calls,
         "llm_successful_calls": model.successes,
         "tickets_needing_retry": sum(r.attempts > 1 for r in results),
         **{f"source_{k}": v for k, v in sorted(sources.items())},
+        "reply_language_fixed": sum(v for k, v in all_flags.items() if k.startswith("reply_language_fixed")),
+        "reply_language_mismatch": sum(v for k, v in all_flags.items() if k.startswith("reply_language_mismatch")),
         "wall_time_s": round(elapsed, 1),
         "mean_latency_ms": int(sum(r.latency_ms for r in results) / len(results)) if results else 0,
     }
 
-    out = settings.results_path
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps({"metrics": metrics, "predictions": [r.public() for r in results]},
                               indent=2, ensure_ascii=False), encoding="utf-8")
     (out.parent / "details.json").write_text(
-        json.dumps({"run": run_stats, "predictions": [r.model_dump() for r in results]}, indent=2, ensure_ascii=False),
+        json.dumps({"run": run_stats, "threshold_sweep": threshold_sweep(results, labels),
+                    "predictions": [r.model_dump() for r in results]}, indent=2, ensure_ascii=False),
         encoding="utf-8")
     write_report(out.parent / "report.md", results, labels, metrics, run_stats, tickets)
 

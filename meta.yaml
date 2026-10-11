@@ -1,4 +1,4 @@
 language: python
-run_command: "make run"
-eval_command: "make eval"
-test_command: "make test"
+run_command: "sh run.sh run"
+eval_command: "sh run.sh eval"
+test_command: "sh run.sh test"

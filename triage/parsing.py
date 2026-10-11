@@ -16,7 +16,7 @@ from dataclasses import dataclass
 
 from pydantic import ValidationError
 
-from .schema import CATEGORIES, PRIORITIES, LLMTriage
+from .schema import CATEGORIES, IMPACT_FACTS, PRIORITIES, LLMTriage
 
 CATEGORY_SYNONYMS = {
     "payment": "billing", "payments": "billing", "invoice": "billing", "refund": "billing",
@@ -154,6 +154,24 @@ def _norm_confidence(value) -> float | None:
     return None
 
 
+_TRUE = {"true", "yes", "y", "1"}
+
+
+def _norm_impact(value) -> dict | None:
+    """Accepts {"fact": true/"yes"/1, ...} or a list of the facts that are true.
+    Unknown keys are dropped, missing ones default to False. None if unusable."""
+    if isinstance(value, list):
+        value = {str(v): True for v in value}
+    if not isinstance(value, dict):
+        return None
+    norm = {str(k).strip().lower().replace(" ", "_").replace("-", "_"): v for k, v in value.items()}
+    out = {}
+    for fact in IMPACT_FACTS:
+        v = norm.get(fact, False)
+        out[fact] = v if isinstance(v, bool) else str(v).strip().lower() in _TRUE
+    return out
+
+
 def _one_line(s) -> str:
     return re.sub(r"\s+", " ", str(s)).strip()[:300] if s is not None else ""
 
@@ -175,6 +193,7 @@ def normalize(obj: dict) -> tuple[dict, bool]:
 
     out = {
         "category": _norm_label(lower.get("category"), CATEGORIES, CATEGORY_SYNONYMS),
+        "impact": _norm_impact(lower.get("impact")),
         "priority": _norm_label(lower.get("priority"), PRIORITIES, PRIORITY_SYNONYMS),
         "summary": _one_line(lower.get("summary")),
         "suggested_reply": str(lower.get("suggested_reply") or "").strip(),

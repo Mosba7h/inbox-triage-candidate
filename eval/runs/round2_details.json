@@ -1,0 +1,828 @@
+{
+  "run": {
+    "model": "llama3.2:3b",
+    "llm_calls": 32,
+    "llm_successful_calls": 32,
+    "tickets_needing_retry": 3,
+    "source_llm": 27,
+    "source_llm_repaired": 2,
+    "source_rule_shortcut": 1,
+    "reply_language_fixed": 1,
+    "reply_language_mismatch": 0,
+    "wall_time_s": 432.2,
+    "mean_latency_ms": 55112
+  },
+  "threshold_sweep": [
+    {
+      "threshold": 0.4,
+      "escalated_share": 0.0,
+      "errors_caught": 0.0
+    },
+    {
+      "threshold": 0.5,
+      "escalated_share": 0.0,
+      "errors_caught": 0.0
+    },
+    {
+      "threshold": 0.6,
+      "escalated_share": 0.0,
+      "errors_caught": 0.0
+    },
+    {
+      "threshold": 0.7,
+      "escalated_share": 0.062,
+      "errors_caught": 0.0
+    },
+    {
+      "threshold": 0.8,
+      "escalated_share": 0.188,
+      "errors_caught": 0.0
+    },
+    {
+      "threshold": 0.9,
+      "escalated_share": 0.188,
+      "errors_caught": 0.0
+    }
+  ],
+  "predictions": [
+    {
+      "id": "T-001",
+      "category": "billing",
+      "priority": "high",
+      "summary": "Duplicate charge for June subscription refund.",
+      "suggested_reply": "Hi Marta, sorry for the mistake. We'll process a refund for the duplicate charge. Please allow 3-5 business days for the refund to be credited back to your original payment method. Order references INV-20614 and INV-20615 will be updated accordingly.",
+      "confidence": 0.9,
+      "escalate": false,
+      "source": "llm",
+      "flags": [
+        "reply_overpromises_check_before_sending"
+      ],
+      "model_confidence": 0.9,
+      "model_priority": "high",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": true,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": false
+      },
+      "attempts": 1,
+      "latency_ms": 19724
+    },
+    {
+      "id": "T-002",
+      "category": "bug",
+      "priority": "high",
+      "summary": "App crashes on export to PDF; deadline critical.",
+      "suggested_reply": "Hi, sorry to hear that the app is crashing on export. This is blocking your deadline and we need to help you ASAP. Can you please try exporting again and see if you can provide more details about the error message? Our team will look into this urgently.",
+      "confidence": 0.9,
+      "escalate": false,
+      "source": "llm",
+      "flags": [],
+      "model_confidence": 0.9,
+      "model_priority": "high",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": false,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": false
+      },
+      "attempts": 1,
+      "latency_ms": 48651
+    },
+    {
+      "id": "T-003",
+      "category": "feature_request",
+      "priority": "low",
+      "summary": "Request to add dark mode to the dashboard.",
+      "suggested_reply": "Thanks for the love and the suggestion! We'll consider adding a dark mode to our dashboard. No rush, we'll keep that in mind for future updates.",
+      "confidence": 0.9,
+      "escalate": false,
+      "source": "llm",
+      "flags": [],
+      "model_confidence": 0.9,
+      "model_priority": "low",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": false,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": true
+      },
+      "attempts": 1,
+      "latency_ms": 62626
+    },
+    {
+      "id": "T-004",
+      "category": "other",
+      "priority": "low",
+      "summary": "Relevant message",
+      "suggested_reply": "It seems like this message may not be relevant to your issue. Can you please rephrase or provide more context?",
+      "confidence": 0.036,
+      "escalate": true,
+      "source": "llm_repaired",
+      "flags": [
+        "llm_invalid_output"
+      ],
+      "model_confidence": 0.0,
+      "model_priority": "low",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": false,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": true
+      },
+      "attempts": 2,
+      "latency_ms": 88240
+    },
+    {
+      "id": "T-005",
+      "category": "account",
+      "priority": "high",
+      "summary": "Customer locked out of account and has billing question.",
+      "suggested_reply": "Hi, sorry to hear you're locked out of your account. We'll help you recover access as soon as possible. Regarding your billing question, I don't have access to your plan renewal date - [CONFIRM: renewal date] - could you please provide that to me so I can assist you with downgrading before the renewal date?",
+      "confidence": 0.9,
+      "escalate": false,
+      "source": "llm",
+      "flags": [
+        "reply_has_placeholders_to_fill"
+      ],
+      "model_confidence": 0.9,
+      "model_priority": "high",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": true,
+        "financial_error": false,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": false
+      },
+      "attempts": 1,
+      "latency_ms": 57607
+    },
+    {
+      "id": "T-006",
+      "category": "bug",
+      "priority": "urgent",
+      "summary": "Production API down for 40 minutes; entire team blocked.",
+      "suggested_reply": "Hi, sorry to hear that our API is down and your team is impacted. Our ops team is on it ASAP. We'll provide an update as soon as we know more about the cause and resolution.",
+      "confidence": 0.9,
+      "escalate": true,
+      "source": "llm",
+      "flags": [],
+      "model_confidence": 0.95,
+      "model_priority": "urgent",
+      "impact": {
+        "widespread_outage": true,
+        "security_incident": false,
+        "customer_blocked": true,
+        "financial_error": false,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": false
+      },
+      "attempts": 1,
+      "latency_ms": 52532
+    },
+    {
+      "id": "T-007",
+      "category": "other",
+      "priority": "medium",
+      "summary": "Data policy question for GDPR compliance.",
+      "suggested_reply": "Hi, thanks for reaching out about our data policy. We do not train models on customer data, and all data is stored in compliance with GDPR regulations. Our data centers are located in [REPLACE WITH GEGRAPHICAL LOCATION]. We'll be happy to provide more information or answer any further questions you may have.",
+      "confidence": 0.9,
+      "escalate": true,
+      "source": "llm",
+      "flags": [
+        "legal_or_compliance_request",
+        "reply_states_unverified_policy",
+        "reply_has_placeholders_to_fill"
+      ],
+      "model_confidence": 0.9,
+      "model_priority": "medium",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": false,
+        "legal_or_compliance": true,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": true
+      },
+      "attempts": 1,
+      "latency_ms": 57340
+    },
+    {
+      "id": "T-008",
+      "category": "security",
+      "priority": "medium",
+      "summary": "Message attempts to manipulate the assistant (prompt injection); no genuine support request found.",
+      "suggested_reply": "Hi, thanks for contacting support. We weren't able to identify a specific issue in your message. If you need help with your account or our product, please describe the problem and we'll be happy to assist.",
+      "confidence": 0.36,
+      "escalate": true,
+      "source": "llm_repaired",
+      "flags": [
+        "llm_invalid_output",
+        "prompt_injection_suspected"
+      ],
+      "model_confidence": 0.5,
+      "model_priority": "low",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": false,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": true
+      },
+      "attempts": 2,
+      "latency_ms": 102943
+    },
+    {
+      "id": "T-009",
+      "category": "billing",
+      "priority": "medium",
+      "summary": "Invoice needed for May payment with company VAT number.",
+      "suggested_reply": "Hi Helios Ltd, we'll send over the invoice with your VAT number. Please allow [CONFIRM: timeframe] for processing. If you have any questions, feel free to ask.",
+      "confidence": 0.9,
+      "escalate": false,
+      "source": "llm",
+      "flags": [
+        "reply_has_placeholders_to_fill"
+      ],
+      "model_confidence": 0.9,
+      "model_priority": "medium",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": false,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": false
+      },
+      "attempts": 1,
+      "latency_ms": 47619
+    },
+    {
+      "id": "T-010",
+      "category": "billing",
+      "priority": "high",
+      "summary": "Payment card update error; subscription expires in 3 days.",
+      "suggested_reply": "Hola, lo siento que estás experimentando problemas al actualizar tu tarjeta de crédito. Estamos trabajando en el error 'algo salió mal' y priorizará tu actualización para evitar perder acceso. Por favor, confirmamos los detalles de tu tarjeta de crédito actual para acelerar el proceso.",
+      "confidence": 0.9,
+      "escalate": true,
+      "source": "llm",
+      "flags": [
+        "reply_language_fixed_spanish",
+        "reply_asks_for_payment_details"
+      ],
+      "model_confidence": 0.9,
+      "model_priority": "high",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": true,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": false
+      },
+      "attempts": 2,
+      "latency_ms": 110049
+    },
+    {
+      "id": "T-011",
+      "category": "feature_request",
+      "priority": "low",
+      "summary": "Bulk import feature for CSV files.",
+      "suggested_reply": "Thanks for your suggestion! We'll consider adding a bulk import feature for CSV files. In the meantime, you can use our API to import contacts in batches. We'll let you know if it makes it onto the roadmap.",
+      "confidence": 0.9,
+      "escalate": false,
+      "source": "llm",
+      "flags": [],
+      "model_confidence": 0.9,
+      "model_priority": "low",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": false,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": true
+      },
+      "attempts": 1,
+      "latency_ms": 44932
+    },
+    {
+      "id": "T-012",
+      "category": "bug",
+      "priority": "high",
+      "summary": "Repeated sync bug on mobile; no response to previous tickets.",
+      "suggested_reply": "Hi, sorry for the lack of response to your previous tickets. We're looking into the sync bug on mobile and will prioritize your issue. We'll keep you updated on our progress.",
+      "confidence": 0.9,
+      "escalate": false,
+      "source": "llm",
+      "flags": [],
+      "model_confidence": 0.9,
+      "model_priority": "high",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": false,
+        "legal_or_compliance": false,
+        "churn_risk": true,
+        "sales_opportunity": false,
+        "minor_or_no_action": false
+      },
+      "attempts": 1,
+      "latency_ms": 58129
+    },
+    {
+      "id": "T-013",
+      "category": "account",
+      "priority": "medium",
+      "summary": "Invite colleague to workspace",
+      "suggested_reply": "Hi, to invite a colleague to your workspace, you can click on the 'Invite Team' button in the top right corner of the workspace dashboard. If you're having trouble finding it, feel free to ask and I can guide you through it.",
+      "confidence": 0.9,
+      "escalate": false,
+      "source": "llm",
+      "flags": [],
+      "model_confidence": 0.9,
+      "model_priority": "medium",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": false,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": true
+      },
+      "attempts": 1,
+      "latency_ms": 59848
+    },
+    {
+      "id": "T-014",
+      "category": "security",
+      "priority": "high",
+      "summary": "Potential IDOR vulnerability in /reports/{id} endpoint.",
+      "suggested_reply": "Thank you for reporting this responsibly. We'll contact you through a private channel to discuss further and take necessary actions to address the vulnerability. Please keep your message confidential until we've had a chance to review and respond.",
+      "confidence": 0.9,
+      "escalate": true,
+      "source": "llm",
+      "flags": [],
+      "model_confidence": 0.95,
+      "model_priority": "high",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": true,
+        "customer_blocked": false,
+        "financial_error": false,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": false
+      },
+      "attempts": 1,
+      "latency_ms": 57412
+    },
+    {
+      "id": "T-015",
+      "category": "other",
+      "priority": "low",
+      "summary": "Suspicious email claiming a gift card prize.",
+      "suggested_reply": "",
+      "confidence": 0.63,
+      "escalate": false,
+      "source": "llm",
+      "flags": [
+        "suspected_phishing",
+        "no_reply_recommended",
+        "keyword_rules_suggest_billing"
+      ],
+      "model_confidence": 0.95,
+      "model_priority": "urgent",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": true,
+        "customer_blocked": false,
+        "financial_error": false,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": false
+      },
+      "attempts": 1,
+      "latency_ms": 57802
+    },
+    {
+      "id": "T-016",
+      "category": "bug",
+      "priority": "medium",
+      "summary": "Reports page slow load times since Thursday.",
+      "suggested_reply": "Sorry to hear that the reports page is taking longer to load. We'll investigate the cause and look into optimizing our servers to improve performance. Can you please provide any error messages or details you've noticed?",
+      "confidence": 0.7,
+      "escalate": false,
+      "source": "llm",
+      "flags": [],
+      "model_confidence": 0.7,
+      "model_priority": "medium",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": false,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": false
+      },
+      "attempts": 1,
+      "latency_ms": 53140
+    },
+    {
+      "id": "T-017",
+      "category": "billing",
+      "priority": "high",
+      "summary": "Request to cancel subscription effective immediately.",
+      "suggested_reply": "Hi cancel.me@example.com, we've cancelled your subscription and stopped billing. You will not be charged again. If you have any questions or concerns, feel free to reply.",
+      "confidence": 0.9,
+      "escalate": false,
+      "source": "llm",
+      "flags": [
+        "urgent_downgraded_no_impact_evidence",
+        "reply_overpromises_check_before_sending"
+      ],
+      "model_confidence": 0.95,
+      "model_priority": "urgent",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": false,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": false
+      },
+      "attempts": 1,
+      "latency_ms": 51580
+    },
+    {
+      "id": "T-018",
+      "category": "bug",
+      "priority": "high",
+      "summary": "Product stopped working; fix ASAP.",
+      "suggested_reply": "Sorry to hear that it's stopped working. Can you please provide more details about the issue so we can investigate and fix it as soon as possible?",
+      "confidence": 0.5,
+      "escalate": true,
+      "source": "llm",
+      "flags": [
+        "urgent_downgraded_no_impact_evidence"
+      ],
+      "model_confidence": 0.95,
+      "model_priority": "urgent",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": false,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": false
+      },
+      "attempts": 1,
+      "latency_ms": 50702
+    },
+    {
+      "id": "T-019",
+      "category": "security",
+      "priority": "urgent",
+      "summary": "Webhook signature mismatch causing integration failure.",
+      "suggested_reply": "Hi, sorry to hear that our signing secret rotation was missed. We'll investigate the issue and contact you directly through a private channel to discuss further. Thank you for bringing this to our attention.",
+      "confidence": 0.9,
+      "escalate": true,
+      "source": "llm",
+      "flags": [],
+      "model_confidence": 0.95,
+      "model_priority": "urgent",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": true,
+        "customer_blocked": false,
+        "financial_error": false,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": false
+      },
+      "attempts": 1,
+      "latency_ms": 49428
+    },
+    {
+      "id": "T-020",
+      "category": "feature_request",
+      "priority": "medium",
+      "summary": "Feature comparison between Pro and Team plans needed for pricing decision.",
+      "suggested_reply": "Hi, thanks for reaching out! We have a [CONFIRM: feature comparison link] that outlines the key differences between our Pro and Team plans. Take a look before your trial ends on Friday to make an informed decision.",
+      "confidence": 0.7,
+      "escalate": false,
+      "source": "llm",
+      "flags": [
+        "reply_has_placeholders_to_fill"
+      ],
+      "model_confidence": 0.7,
+      "model_priority": "medium",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": false,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": true,
+        "minor_or_no_action": true
+      },
+      "attempts": 1,
+      "latency_ms": 50754
+    },
+    {
+      "id": "T-021",
+      "category": "account",
+      "priority": "high",
+      "summary": "Data deletion request under GDPR.",
+      "suggested_reply": "Dear gdpr.request@example.com, we are processing your data deletion request. We will confirm in writing once the deletion is complete. Please allow [CONFIRM: statutory period] for the process to be completed. We will contact you via this email address once the request is fulfilled.",
+      "confidence": 0.9,
+      "escalate": true,
+      "source": "llm",
+      "flags": [
+        "legal_or_compliance_request",
+        "reply_has_placeholders_to_fill"
+      ],
+      "model_confidence": 0.9,
+      "model_priority": "high",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": false,
+        "legal_or_compliance": true,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": false
+      },
+      "attempts": 1,
+      "latency_ms": 53067
+    },
+    {
+      "id": "T-022",
+      "category": "bug",
+      "priority": "medium",
+      "summary": "Notifications stopped working on iOS after app update v4.2.1.",
+      "suggested_reply": "Sorry to hear that notifications stopped working on your iPhone. Can you please try resetting the app's settings or reinstalling the app? We'll also investigate this issue and look into a fix for future updates.",
+      "confidence": 0.7,
+      "escalate": false,
+      "source": "llm",
+      "flags": [],
+      "model_confidence": 0.7,
+      "model_priority": "medium",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": false,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": false
+      },
+      "attempts": 1,
+      "latency_ms": 54181
+    },
+    {
+      "id": "T-023",
+      "category": "other",
+      "priority": "low",
+      "summary": "Customer states they figured out the issue and thanks the agent.",
+      "suggested_reply": "No worries, glad you were able to resolve the issue on your own!",
+      "confidence": 0.05,
+      "escalate": true,
+      "source": "llm",
+      "flags": [],
+      "model_confidence": 0.0,
+      "model_priority": "low",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": false,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": true
+      },
+      "attempts": 1,
+      "latency_ms": 51801
+    },
+    {
+      "id": "T-024",
+      "category": "feature_request",
+      "priority": "medium",
+      "summary": "Request for SAML SSO with Okta and SCIM provisioning for 200-seat rollout.",
+      "suggested_reply": "Hi, thanks for considering us for your SSO needs. We'll review our plans and capabilities to see if we can meet your requirements. We'll follow up with a detailed assessment and timeline once we've evaluated your request.",
+      "confidence": 0.6,
+      "escalate": false,
+      "source": "llm",
+      "flags": [],
+      "model_confidence": 0.6,
+      "model_priority": "medium",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": false,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": true,
+        "minor_or_no_action": false
+      },
+      "attempts": 1,
+      "latency_ms": 54299
+    },
+    {
+      "id": "T-025",
+      "category": "billing",
+      "priority": "high",
+      "summary": "Customer disputes annual plan charge, wants refund or reversal.",
+      "suggested_reply": "Hi, sorry for the mistake. We'll process the refund for the incorrect annual charge. You'll receive a refund within the next 3-5 business days. Once that's done, you're free to re-subscribe on a monthly plan at any time.",
+      "confidence": 0.9,
+      "escalate": false,
+      "source": "llm",
+      "flags": [
+        "reply_overpromises_check_before_sending"
+      ],
+      "model_confidence": 0.9,
+      "model_priority": "high",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": true,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": false
+      },
+      "attempts": 1,
+      "latency_ms": 53277
+    },
+    {
+      "id": "T-026",
+      "category": "other",
+      "priority": "low",
+      "summary": "Small typo on website homepage.",
+      "suggested_reply": "Thanks for pointing that out! We appreciate your attention to detail and will make sure to correct the typo.",
+      "confidence": 0.4,
+      "escalate": true,
+      "source": "llm",
+      "flags": [],
+      "model_confidence": 0.4,
+      "model_priority": "low",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": false,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": true
+      },
+      "attempts": 1,
+      "latency_ms": 51194
+    },
+    {
+      "id": "T-027",
+      "category": "feature_request",
+      "priority": "medium",
+      "summary": "Request to export all account data in a format of choice (JSON or CSV).",
+      "suggested_reply": "Hi, thanks for reaching out. We don't have a built-in export-all feature yet, but we can discuss possible API options or workarounds. Can you tell us more about your reorg plans and what data you'd like to export?",
+      "confidence": 0.7,
+      "escalate": false,
+      "source": "llm",
+      "flags": [],
+      "model_confidence": 0.7,
+      "model_priority": "medium",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": false,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": false
+      },
+      "attempts": 1,
+      "latency_ms": 54553
+    },
+    {
+      "id": "T-028",
+      "category": "billing",
+      "priority": "high",
+      "summary": "Incorrect charge on card; plan price discrepancy.",
+      "suggested_reply": "Hi, sorry for the mistake. We'll investigate the discrepancy and update your card balance to reflect the correct plan price. We'll also review our billing process to prevent similar errors.",
+      "confidence": 0.9,
+      "escalate": false,
+      "source": "llm",
+      "flags": [],
+      "model_confidence": 0.9,
+      "model_priority": "high",
+      "impact": {
+        "widespread_outage": false,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": true,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": false
+      },
+      "attempts": 1,
+      "latency_ms": 50416
+    },
+    {
+      "id": "T-029",
+      "category": "bug",
+      "priority": "urgent",
+      "summary": "Outage update: 503 errors from morning, recovery around 11am.",
+      "suggested_reply": "Hi, yes, the outage has been resolved. We apologize for the inconvenience and appreciate your diligence in keeping our customers informed. We'll make sure to update our status page with the latest information.",
+      "confidence": 0.9,
+      "escalate": true,
+      "source": "llm",
+      "flags": [
+        "reply_states_unverified_status"
+      ],
+      "model_confidence": 0.95,
+      "model_priority": "urgent",
+      "impact": {
+        "widespread_outage": true,
+        "security_incident": false,
+        "customer_blocked": false,
+        "financial_error": false,
+        "legal_or_compliance": false,
+        "churn_risk": false,
+        "sales_opportunity": false,
+        "minor_or_no_action": false
+      },
+      "attempts": 1,
+      "latency_ms": 49539
+    },
+    {
+      "id": "T-030",
+      "category": "other",
+      "priority": "low",
+      "summary": "Empty message (subject: Help please); needs details from customer.",
+      "suggested_reply": "Hi, thanks for reaching out. It looks like your message came through without any details. Could you tell us a bit more about what you need help with so we can assist?",
+      "confidence": 0.4,
+      "escalate": true,
+      "source": "rule_shortcut",
+      "flags": [
+        "empty_body"
+      ],
+      "model_confidence": null,
+      "model_priority": null,
+      "impact": null,
+      "attempts": 0,
+      "latency_ms": 0
+    }
+  ]
+}
