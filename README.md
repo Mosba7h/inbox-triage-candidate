@@ -156,7 +156,7 @@ from the last eval run, so the UI isn't empty.
 How the two rounds of changes were made:
 
 1. **Round 1 (v1 → round 1): tuned on the test set.** I read the 16 labeled failures and changed the prompt and guards in response (category boundaries, the urgency guard, the no-invented-facts rule). That contaminates the test set. Round-1 numbers are optimistic and shown only as history.
-2. **Round 2 (round 1 → final): tuned on the dev set only.** Every alternative was compared on dev, the configuration was frozen, and then the test set was run (twice, with identical labels). It still isn't pristine: the *ideas* for round 2 came partly from round-1 test errors (priority bias, T-010, T-021), and I wrote the dev labels after having seen the test labels.
+2. **Round 2 (round 1 → final): tuned on the dev set only.** Every alternative was compared on dev, the configuration was frozen, and then the test set was run (3 times; see below for the one ticket that varies). It still isn't pristine: the *ideas* for round 2 came partly from round-1 test errors (priority bias, T-010, T-021), and I wrote the dev labels after having seen the test labels.
 3. Three reply-safety detectors (status claims, payment-details requests, `[REPLACE …]` placeholders) were added after reading the final test **replies**. They only add flags and escalation; they don't change any scored category or priority.
 
 ---
@@ -169,7 +169,13 @@ How the two rounds of changes were made:
 |---|---|---|---|---|
 | v1: first prompt | 0.750 | 0.562 | 0.938 | – |
 | round 1: tuned on test (3 runs, identical) | 0.938 | 0.562 | 0.938 | 0.500 |
-| **final**: tuned on dev (2 runs, identical) | **0.938** | **0.750** | **1.000** | **0.688** |
+| **final**: tuned on dev (3 runs) | **0.938** | **0.750 / 0.750 / 0.688** | **1.000** | **0.688 / 0.688 / 0.625** |
+
+**Run-to-run variance:** temperature 0 isn't bit-exact on Ollama when requests are batched
+concurrently. In the final config, one ticket (T-022, iOS push notifications) flipped between
+`medium` and `high` in 1 of 3 runs. That third run was the fresh-clone dry run in a clean container
+(`eval/runs/round2_freshclone_dryrun_*`). Category labels were identical in all runs.
+`eval/results.json` is from a 0.750 run; expect 0.69–0.75 for priority on a re-run.
 
 | dev set (32 tickets) | category | priority | ±1 | both correct |
 |---|---|---|---|---|
@@ -198,7 +204,7 @@ of the 5 wrong test tickets (T-019, via the security guard).
 labeled `bug`. This is debatable: an unannounced signing-secret rotation is security-adjacent.
 It's escalated either way, and I'd rather over-flag security than miss a compromise.
 
-**Priority, 4 misses, all one level off:**
+**Priority, 4 misses (5 in the run where T-022 went to `high`), all one level off:**
 - T-009 (invoice copy with VAT number) and T-013 (how to invite a teammate): `low` → `medium`. The model treats any request that needs action as at least medium.
 - T-011 (bulk CSV import, "would save me hours"): `medium` → `low`. The model read it as a nice-to-have; the label counts the stated business impact.
 - T-017 (cancel subscription): `medium` → `high`. The model said `urgent` ("effective immediately"); the urgency guard brought it down one level, but not to medium.
